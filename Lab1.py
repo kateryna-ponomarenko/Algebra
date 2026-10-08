@@ -195,7 +195,7 @@ def rotate_xy(array, theta):
     plot_off(rotated.T, faces,f"Rotation XY {theta}")
     return rotated
 
-rotate_xy(vertices_3D, 45)
+# rotate_xy(vertices_3D, 45)
 
 def rotate_yz(array, theta):
     copy_arr = array.copy()
@@ -206,7 +206,7 @@ def rotate_yz(array, theta):
     plot_off(rotated.T, faces, f"Rotation YZ {theta}")
     return rotated
 
-rotate_yz(vertices_3D, 45)
+# rotate_yz(vertices_3D, 45)
 
 def rotate_xz(array, theta):
     copy_arr = array.copy()
@@ -217,5 +217,21 @@ def rotate_xz(array, theta):
     plot_off(rotated.T, faces, f"Rotation XZ {theta}")
     return rotated
 
-rotate_xz(vertices_3D, 45)
+# rotate_xz(vertices_3D, 45)
 
+print("scenario 1")
+print("rotation xy 30 -> rotation yz 45 -> rotation xz 20")
+
+D1 = rotate_xz(rotate_yz(rotate_xy(vertices_3D, 30), 45),20)
+print("scenario 2")
+print("rotation yz 45 -> rotation xy 30 ->  rotation xz 20")
+
+D2 =rotate_xz(rotate_xy(rotate_yz(vertices_3D, 45), 30),20)
+print("scenario 3")
+print(" rotation xz 20 -> rotation yz 45 -> rotation xy 30 ")
+D3 = rotate_xy(rotate_yz(rotate_xy(vertices_3D, 20), 45),30)
+
+if np.allclose(D1, D2) and np.allclose(D2, D3):
+    print("same")
+else:
+    print("d1 d2 d3 are different. result depend on the order")
