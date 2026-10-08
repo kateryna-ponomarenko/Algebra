@@ -21,7 +21,7 @@ def plot_shape(array, title):
     plt.axhline() #- додають осі.
     plt.axvline() #- додають осі.
     plt.axis("equal") # однаковий масштаб осей
-    plt.title(type)
+    plt.title(title)
     plt.show()
 
 plot_shape(lynxT, "Original")
@@ -37,7 +37,7 @@ def stretch(array, a, b):
     plot_shape(stretched,"Stretch")
     return stretched
 
-stretch(lynxT,1.5,0.7)
+# stretch(lynxT,1.5,0.7)
 
 def shear(array, a, b):
     copy_arr = array.copy()
@@ -49,9 +49,9 @@ def shear(array, a, b):
     plot_shape(sheared ,"Shear")
     return sheared
 
-shear(lynxT, 0, 0)
-shear(lynxT, 0.5, 0)
-shear(lynxT, 0, 0.5)
+# shear(lynxT, 0, 0)
+# shear(lynxT, 0.5, 0)
+# shear(lynxT, 0, 0.5)
 
 
 def reflection(array, a, b):
@@ -69,9 +69,42 @@ def reflection(array, a, b):
     plot_shape(reflected, "Reflection")
     return reflected
 
-reflection(lynxT, 1, 1)
-reflection(lynxT, 1, 0)
-reflection(lynxT, 0, 0)
+# reflection(lynxT, 1, 1)
+# reflection(lynxT, 1, 0)
+# reflection(lynxT, 0, 0)
+#
+
+def rotation(array, theta_gradus):
+    copy_arr = array.copy()
+    ##make matrixAB
+    theta = np.radians(theta_gradus)
+    matrixA = np.array([[np.cos(theta), -1*np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    rotated = matrixA @ copy_arr
+    print(matrixA)
+    plot_shape(rotated, f"Rotation {theta_gradus}")
+    return rotated
+#
+# rotation(lynxT, 0)
+# rotation(lynxT, 90)
+# rotation(lynxT, 45)
 
 
-def rotation(array, theta):
+print("scenario 1")
+print("rotation 45 -> stretch 2 0.3 -> shear 0.2 0.7 -> reflection 1 0")
+
+S1 = reflection(shear(stretch(rotation(lynxT, 45),2,0.3),0.2,0.7),1,0)
+
+print("scenario 2")
+print("stretch 2 0.3 -> reflection 1 0 -> rotation 45 ->  shear 0.2 0.7 ")
+
+S2 = shear(rotation(reflection(stretch(lynxT,2,0.3),1,0),45), 0.2 , 0.7)
+
+print("scenario 3")
+print("reflection 1 0 -> rotation 45 ->   shear 0.2 0.7 -> stretch 2 0.3  ")
+
+S3 = stretch(shear(rotation(reflection(lynxT,1,0),45), 0.2, 0.7), 2, 0.3)
+
+if np.allclose(S1, S2) and np.allclose(S2, S3):
+    print("same")
+else:
+    print("s1 s2 s3 are different. result depend on the order")
