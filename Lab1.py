@@ -1,5 +1,8 @@
 import numpy as np
+
+# Імпортуємо matplotlib для побудови 3D-графіків
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 lynx = np.array([
 [209.70, 368.42], [157.63, 332.16], [118.82, 284.21], [80.95, 224.56], [43.08, 244.44], [20.36, 266.67], [-4.26, 293.57], [2.37, 263.16], [-20.36, 292.40], [-39.29, 299.42], [-21.30, 259.65],
@@ -15,6 +18,7 @@ lynx = np.array([
 lynxT = lynx.T
 print (lynxT.shape)
 
+
 def plot_shape(array, title):
     plt.figure(figsize=(6, 6))
     plt.fill(array[0],array[1])
@@ -24,9 +28,9 @@ def plot_shape(array, title):
     plt.title(title)
     plt.show()
 
-plot_shape(lynxT, "Original")
-
-
+# plot_shape(lynxT, "Original")
+#
+#
 def stretch(array, a, b):
     copy_arr = array.copy()
     ##make matrixAB
@@ -37,8 +41,8 @@ def stretch(array, a, b):
     plot_shape(stretched,"Stretch")
     return stretched
 
-# stretch(lynxT,1.5,0.7)
-
+# # stretch(lynxT,1.5,0.7)
+#
 def shear(array, a, b):
     copy_arr = array.copy()
     ##make matrixAB
@@ -49,11 +53,11 @@ def shear(array, a, b):
     plot_shape(sheared ,"Shear")
     return sheared
 
-# shear(lynxT, 0, 0)
-# shear(lynxT, 0.5, 0)
-# shear(lynxT, 0, 0.5)
-
-
+# # shear(lynxT, 0, 0)
+# # shear(lynxT, 0.5, 0)
+# # shear(lynxT, 0, 0.5)
+#
+#
 def reflection(array, a, b):
     if a == 0 & b == 0:
         print("this values are not expected")
@@ -69,11 +73,11 @@ def reflection(array, a, b):
     plot_shape(reflected, "Reflection")
     return reflected
 
-# reflection(lynxT, 1, 1)
-# reflection(lynxT, 1, 0)
-# reflection(lynxT, 0, 0)
+# # reflection(lynxT, 1, 1)
+# # reflection(lynxT, 1, 0)
+# # reflection(lynxT, 0, 0)
+# #
 #
-
 def rotation(array, theta_gradus):
     copy_arr = array.copy()
     ##make matrixAB
@@ -83,28 +87,135 @@ def rotation(array, theta_gradus):
     print(matrixA)
     plot_shape(rotated, f"Rotation {theta_gradus}")
     return rotated
+# #
+# # rotation(lynxT, 0)
+# # rotation(lynxT, 90)
+# # rotation(lynxT, 45)
 #
-# rotation(lynxT, 0)
-# rotation(lynxT, 90)
-# rotation(lynxT, 45)
+#
+# print("scenario 1")
+# print("rotation 45 -> stretch 2 0.3 -> shear 0.2 0.7 -> reflection 1 0")
+#
+# S1 = reflection(shear(stretch(rotation(lynxT, 45),2,0.3),0.2,0.7),1,0)
+#
+# print("scenario 2")
+# print("stretch 2 0.3 -> reflection 1 0 -> rotation 45 ->  shear 0.2 0.7 ")
+#
+# S2 = shear(rotation(reflection(stretch(lynxT,2,0.3),1,0),45), 0.2 , 0.7)
+#
+# print("scenario 3")
+# print("reflection 1 0 -> rotation 45 ->   shear 0.2 0.7 -> stretch 2 0.3  ")
+#
+# S3 = stretch(shear(rotation(reflection(lynxT,1,0),45), 0.2, 0.7), 2, 0.3)
+#
+# if np.allclose(S1, S2) and np.allclose(S2, S3):
+#     print("same")
+# else:
+#     print("s1 s2 s3 are different. result depend on the order")
+#
+# # 3D space
+
+#from pdf
+def read_off(filename: str):
+    with open(filename, "r") as f:
+        # Перевіряємо, чи перший рядок починається з OFF
+        if "OFF" != f.readline().strip():
+            raise ValueError("Not a valid OFF header")
+
+        # Зчитуємо кількість вершин, граней та ребер (третє значення часто ігнорується)
+        n_verts, n_faces, _ = map(int, f.readline().strip().split())
+
+        # Зчитуємо координати всіх вершин (x, y, z)
+        verts = [
+            list(map(float, f.readline().strip().split()))
+            for _ in range(n_verts)
+        ]
+
+        # Зчитуємо грані: перше число у рядку - кількість вершин грані (ігноруємо), далі індекси
+        faces = [
+            list(map(int, f.readline().strip().split()[1:]))
+            for _ in range(n_faces)
+        ]
+
+        # Повертаємо вершини у вигляді масиву NumPy та список граней
+        return np.array(verts), faces
+
+# File reading
+vertices, faces = read_off(
+    "airplane/test/airplane_0628.off"
+)
+# print(vertices.shape)
+# print(faces[:3])
+# print(vertices)
+
+def plot_off(vertices, faces, title):
+    fig = plt.figure(figsize=(8, 8))  # створюємо вікно
+    ax = fig.add_subplot(111, projection="3d")  # додаємо 3D координатну систему
+
+    # Створюємо полігональну сітку з граней (faces) та додаємо її на графік
+    mesh = Poly3DCollection(
+        [vertices[face] for face in faces],
+        alpha=0.3,
+        edgecolor="k",  # прозорість 0.3, чорні ребра
+    )
+    ax.add_collection3d(mesh)
+
+    # Додаємо вершини як червоні точки
+    # ax.scatter(vertices[:, 0], vertices[:, 1], vertices[:, 2], s=2, c="r")
+
+    # Підписуємо осі
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+
+    # Автоматично масштабуємо сцену під модель
+    ax.auto_scale_xyz(vertices[:, 0], vertices[:, 1], vertices[:, 2])
+
+    #not nessesary fom ai for better view
+    ax.set_box_aspect(np.ptp(vertices, axis=0))
+    #
+
+    ax.set_title(title)
+
+    plt.show()  # показуємо результат
+
+# Виклик функції для побудови OFF-моделі
+# plot_off(vertices, faces)
 
 
-print("scenario 1")
-print("rotation 45 -> stretch 2 0.3 -> shear 0.2 0.7 -> reflection 1 0")
 
-S1 = reflection(shear(stretch(rotation(lynxT, 45),2,0.3),0.2,0.7),1,0)
+vertices_3D = vertices.T
 
-print("scenario 2")
-print("stretch 2 0.3 -> reflection 1 0 -> rotation 45 ->  shear 0.2 0.7 ")
+def rotate_xy(array, theta):
+    copy_arr = array.copy()
+    theta_rad = np.radians(theta)
+    matrixA = np.array([[np.cos(theta_rad), -1 * np.sin(theta_rad), 0], [np.sin(theta_rad), np.cos(theta_rad), 0],[0,0,1]])
+    rotated = matrixA @ copy_arr
+    print(matrixA)
+    plot_off(rotated.T, faces,f"Rotation XY {theta}")
+    return rotated
 
-S2 = shear(rotation(reflection(stretch(lynxT,2,0.3),1,0),45), 0.2 , 0.7)
+rotate_xy(vertices_3D, 45)
 
-print("scenario 3")
-print("reflection 1 0 -> rotation 45 ->   shear 0.2 0.7 -> stretch 2 0.3  ")
+def rotate_yz(array, theta):
+    copy_arr = array.copy()
+    theta_rad = np.radians(theta)
+    matrixA = np.array([[1, 0, 0],[0,np.cos(theta_rad),-1 * np.sin(theta_rad)],[0,np.sin(theta_rad), np.cos(theta_rad)]])
+    rotated = matrixA @ copy_arr
+    print(matrixA)
+    plot_off(rotated.T, faces, f"Rotation YZ {theta}")
+    return rotated
 
-S3 = stretch(shear(rotation(reflection(lynxT,1,0),45), 0.2, 0.7), 2, 0.3)
+rotate_yz(vertices_3D, 45)
 
-if np.allclose(S1, S2) and np.allclose(S2, S3):
-    print("same")
-else:
-    print("s1 s2 s3 are different. result depend on the order")
+def rotate_xz(array, theta):
+    copy_arr = array.copy()
+    theta_rad = np.radians(theta)
+    matrixA = np.array([[np.cos(theta_rad),0,-1 * np.sin(theta_rad)],[0,1,0],[np.sin(theta_rad), 0 ,np.cos(theta_rad)]])
+    rotated = matrixA @ copy_arr
+    print(matrixA)
+    plot_off(rotated.T, faces, f"Rotation XZ {theta}")
+    return rotated
+
+rotate_xz(vertices_3D, 45)
+
